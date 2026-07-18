@@ -92,6 +92,46 @@ if (isLowPower) document.documentElement.classList.add('low-power');
 
 let animationsStarted = false;
 
+function initImageEffects() {
+  if (isLowPower || typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+  // Parallax sulla foto hero mentre si scrolla via
+  const heroImg = document.querySelector('.h-bg img');
+  if (heroImg) {
+    gsap.to(heroImg, {
+      yPercent: 12,
+      ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true },
+    });
+  }
+
+  // Reveal a tendina + zoom-out sulle immagini sotto la piega (team, vetrina)
+  document.querySelectorAll('.img-reveal').forEach((el) => {
+    const img = el.querySelector('img');
+    if (!img) return;
+    gsap.fromTo(
+      el,
+      { clipPath: 'inset(100% 0% 0% 0%)' },
+      {
+        clipPath: 'inset(0% 0% 0% 0%)',
+        duration: 1.1,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+      }
+    );
+    gsap.fromTo(
+      img,
+      { scale: 1.25 },
+      {
+        scale: 1,
+        duration: 1.3,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+      }
+    );
+  });
+}
+
 function initMarquee() {
   if (isLowPower || typeof gsap === 'undefined') return;
   const track = document.getElementById('mq');
@@ -123,9 +163,13 @@ function boot() {
   if (animationsStarted) return;
   animationsStarted = true;
   initMarquee();
+  initImageEffects();
   initLenis();
   if (typeof ScrollTrigger !== 'undefined') {
     document.fonts.ready.then(() => ScrollTrigger.refresh());
+    // le immagini con width/height dichiarati non spostano il layout, ma un refresh
+    // in piu' dopo il primo paint protegge comunque da eventuali scarti di misura
+    setTimeout(() => ScrollTrigger.refresh(), 400);
   }
 }
 
