@@ -1,18 +1,30 @@
-// Cookie banner
+// Cookie banner — sposta anche il bottone WhatsApp fluttuante mentre il banner e' visibile
+// (altrimenti su mobile il banner (z-index piu' alto) copre il bottone WA)
 (function () {
   var banner = document.getElementById('ck');
   var okBtn = document.getElementById('ck-ok');
   var noBtn = document.getElementById('ck-no');
+
+  function syncWaOffset() {
+    var h = banner.classList.contains('show') ? banner.offsetHeight : 0;
+    document.documentElement.style.setProperty('--wa-off', h + 'px');
+  }
+
   if (!localStorage.getItem('narciso_cookies_choice')) {
     banner.classList.add('show');
   }
+  syncWaOffset();
+  window.addEventListener('resize', syncWaOffset);
+
   okBtn.addEventListener('click', function () {
     localStorage.setItem('narciso_cookies_choice', 'accepted');
     banner.classList.remove('show');
+    syncWaOffset();
   });
   noBtn.addEventListener('click', function () {
     localStorage.setItem('narciso_cookies_choice', 'rejected');
     banner.classList.remove('show');
+    syncWaOffset();
   });
 })();
 
